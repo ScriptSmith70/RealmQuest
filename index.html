@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Realm Quest</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+        }
+        #game-container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #story-text {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+        }
+        #choices {
+            margin-bottom: 20px;
+        }
+        .choice-button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        #stats {
+            font-size: 1em;
+            margin-top: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Realm Quest</h1>
+        <p id="story-text">Loading story...</p>
+        <div id="choices"></div>
+        <div id="stats">
+            <p>Health: <span id="health">100</span></p>
+            <p>Courage: <span id="courage">50</span></p>
+            <p>Wisdom: <span id="wisdom">50</span></p>
+        </div>
+    </div>
+    <script>
+        class StoryNode {
+            constructor(description) {
+                this.description = description;
+                this.options = [];
+                this.nextNodes = [];
+            }
+
+            addChoice(option, node) {
+                this.options.push(option);
+                this.nextNodes.push(node);
+            }
+
+            getNextNode(option) {
+                return this.nextNodes[this.options.indexOf(option)];
+            }
+        }
+
+        class AdventureGame {
+            constructor() {
+                this.initializeStory();
+                this.player = {
+                    health: 100,
+                    courage: 50,
+                    wisdom: 50,
+                };
+                this.currentNode = this.startNode;
+                this.updateStats();
+            }
+
+            initializeStory() {
+                const node1 = new StoryNode("You are in a dark forest. Paths lead north and south.");
+                const node2 = new StoryNode("You find a small village. Paths lead east and west.");
+                const node3 = new StoryNode("You encounter a wild animal. Choices: [fight, run]");
+                const node4 = new StoryNode("You reach a dead end. You can go back.");
+                const node5 = new StoryNode("You stumble upon an old temple. Paths lead inside or around it.");
+
+                node1.addChoice("north", node2);
+                node1.addChoice("south", node3);
+                node2.addChoice("east", node4);
+                node2.addChoice("west", node1);
+                node3.addChoice("fight", node4);
+                node3.addChoice("run", node1);
+                node4.addChoice("north", node5);
+                node4.addChoice("south", node1);
+                
+                this.startNode = node1;
+            }
+
+            updateStats() {
+                document.getElementById("health").textContent = this.player.health;
+                document.getElementById("courage").textContent = this.player.courage;
+                document.getElementById("wisdom").textContent = this.player.wisdom;
+            }
+
+            displayStory() {
+                document.getElementById("story-text").textContent = this.currentNode.description;
+                const choicesDiv = document.getElementById("choices");
+                choicesDiv.innerHTML = '';
+                this.currentNode.options.forEach((option) => {
+                    const button = document.createElement("button");
+                    button.className = "choice-button";
+                    button.textContent = option;
+                    button.onclick = () => this.makeChoice(option);
+                    choicesDiv.appendChild(button);
+                });
+            }
+
+            makeChoice(choice) {
+                const nextNode = this.currentNode.getNextNode(choice);
+                if (nextNode) {
+                    this.currentNode = nextNode;
+                    this.updatePlayerStats(choice);
+                    this.displayStory();
+                } else {
+                    alert("Invalid choice!");
+                }
+            }
+
+            updatePlayerStats(choice) {
+                if (choice === "fight") {
+                    this.player.health -= 20;
+                    this.player.courage += 10;
+                } else if (choice === "run") {
+                    this.player.courage -= 10;
+                }
+                this.updateStats();
+            }
+
+            start() {
+                this.displayStory();
+            }
+        }
+
+        const game = new AdventureGame();
+        game.start();
+    </script>
+</body>
+</html>
