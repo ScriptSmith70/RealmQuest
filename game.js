@@ -15,7 +15,10 @@ class StoryNode {
     // Get the next node based on the player's choice
     getNextNode(choice) {
         const index = this.options.indexOf(choice);
-        return this.nextNodes[index] || null;
+        if (index !== -1) {
+            return this.nextNodes[index];
+        }
+        return null;
     }
 }
 
@@ -23,7 +26,7 @@ class AdventureGame {
     constructor() {
         this.initializeStory();
         this.currentNode = this.startNode;
-        this.displayStory(); // Call this to display the first story node!
+        this.displayStory();
     }
 
     // Initialize all nodes and build the story
@@ -48,7 +51,7 @@ class AdventureGame {
         node4.addChoice("Go to the Government Building", node7);
 
         // ACT 1: INVESTIGATION BEGINS (Nodes 6-20)
-        const node6 = new StoryNode("You arrive at the Old Factory. It looks abandoned but you hear noises inside.");
+        const node6 = new StoryNode("You arrive at the Old Factory. It looks abandoned, but you hear noises inside.");
         const node7 = new StoryNode("The Government Building is heavily guarded. You might need a disguise.");
         const node8 = new StoryNode("You notice strange symbols around the factory. They seem to be part of some code.");
         const node9 = new StoryNode("A shadowy figure watches you from afar, disappearing when you approach.");
@@ -94,6 +97,7 @@ class AdventureGame {
         const choicesDiv = document.getElementById("choices");
         choicesDiv.innerHTML = '';
 
+        // Create buttons for each choice
         this.currentNode.options.forEach(option => {
             const button = document.createElement('button');
             button.textContent = option;
